@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/layout_padding"
+    tools:context=".views.MainActivity">
+
+    <android.support.constraint.Guideline
+        android:id="@+id/title_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.15" />
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pocket_soccer"
+        android:textSize="@dimen/titleText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/title_guideline" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/menu_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.55" />
+
+    <TextView
+        android:id="@+id/new_game"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/new_game"
+        android:textSize="@dimen/menuText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/resume_game"
+        app:layout_constraintTop_toTopOf="@id/menu_guideline" />
+
+    <TextView
+        android:id="@+id/resume_game"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/resume_game"
+        android:textSize="@dimen/menuText"
+        app:layout_constraintLeft_toRightOf="@id/new_game"
+        app:layout_constraintRight_toLeftOf="@id/statistics"
+        app:layout_constraintTop_toTopOf="@id/menu_guideline" />
+
+    <TextView
+        android:id="@+id/statistics"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stats"
+        android:textSize="@dimen/menuText"
+        app:layout_constraintLeft_toRightOf="@id/resume_game"
+        app:layout_constraintRight_toLeftOf="@id/settings"
+        app:layout_constraintTop_toTopOf="@id/menu_guideline" />
+
+    <TextView
+        android:id="@+id/settings"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/settings"
+        android:textSize="@dimen/menuText"
+        app:layout_constraintLeft_toRightOf="@id/statistics"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/menu_guideline" />
+
+</android.support.constraint.ConstraintLayout>

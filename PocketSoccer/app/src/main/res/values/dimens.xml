@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="titleText">72sp</dimen>
+    <dimen name="subtitleText">56sp</dimen>
+    <dimen name="optionsText">48sp</dimen>
+    <dimen name="menuText">42sp</dimen>
+    <dimen name="smallText">32sp</dimen>
+    <dimen name="layout_padding">30dp</dimen>
+    <dimen name="pair_padding">20dp</dimen>
+    <dimen name="icon_size">36dp</dimen>
+    <dimen name="slider_height">50dp</dimen>
+    <dimen name="pair_height">75dp</dimen>
+</resources>
