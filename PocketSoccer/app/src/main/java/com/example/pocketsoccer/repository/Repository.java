@@ -16,32 +16,65 @@ public class Repository {
 
     private GameDao gameDao;
 
-    private LiveData<List<Pair>> pairs;
-
-    private LiveData<List<Game>> games;
-
     public Repository(Application application) {
         AppDatabase database = AppDatabase.getInstance(application);
         pairDao = database.pairDao();
         gameDao = database.gameDao();
-        pairs = pairDao.getAll();
-        games = gameDao.getAll();
     }
 
     public LiveData<List<Pair>> getAllPairs() {
-        return pairs;
+        return pairDao.getAllPairs();
     }
 
-    public void deleteAllPairs() {
+    public LiveData<Pair> getPairById(int id) {
+        return pairDao.getPairById(id);
+    }
+
+    public void insertPair(final Pair pair) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                pairDao.deleteAll(pairs.getValue());
+                pairDao.insertPair(pair);
             }
         }).start();
     }
 
-    public LiveData<List<Game>> getAllGames() {
-        return games;
+    public void deleteAllPairs(final List<Pair> pairs) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                pairDao.deleteAllPairs(pairs);
+            }
+        }).start();
+    }
+
+    public LiveData<List<Game>> getAllGamesOfPair(int pairId) {
+        return gameDao.getAllGamesOfPair(pairId);
+    }
+
+    public LiveData<Integer> getPlayer1WinsOfPair(int pairId) {
+        return gameDao.getPlayer1WinsOfPair(pairId);
+    }
+
+    public LiveData<Integer> getPlayer2WinsOfPair(int pairId) {
+        return gameDao.getPlayer2WinsOfPair(pairId);
+    }
+
+    public void insertGame(final Game game) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                gameDao.insertGame(game);
+            }
+        }).start();
+    }
+
+    public void deleteGames(final List<Game> games) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                gameDao.deleteGames(games);
+            }
+        }).start();
     }
 }

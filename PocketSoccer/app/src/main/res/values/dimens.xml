@@ -10,4 +10,5 @@
     <dimen name="icon_size">36dp</dimen>
     <dimen name="slider_height">50dp</dimen>
     <dimen name="pair_height">75dp</dimen>
+    <dimen name="semicolon_padding">5dp</dimen>
 </resources>

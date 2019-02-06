@@ -10,16 +10,20 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.pocketsoccer.R;
+import com.example.pocketsoccer.views.game.PlayersActivity;
 import com.example.pocketsoccer.views.settings.SettingsActivity;
 import com.example.pocketsoccer.views.statistics.StatisticsActivity;
 
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+    private boolean sound = true;
+
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
         newGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent playersIntent = new Intent(v.getContext(), PlayersActivity.class);
+                startActivity(playersIntent);
             }
         });
 
@@ -84,6 +89,19 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent settingsIntent = new Intent(v.getContext(), SettingsActivity.class);
                 startActivity(settingsIntent);
+            }
+        });
+
+        final ImageView soundIcon = findViewById(R.id.sound);
+        soundIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sound) {
+                    soundIcon.setImageDrawable(getDrawable(R.drawable.ic_volume_off_white_24dp));
+                } else {
+                    soundIcon.setImageDrawable(getDrawable(R.drawable.ic_volume_up_white_24dp));
+                }
+                sound = !sound;
             }
         });
     }

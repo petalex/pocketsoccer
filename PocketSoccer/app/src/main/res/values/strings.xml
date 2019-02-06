@@ -20,4 +20,14 @@
     <string name="right">right</string>
     <string name="statistics">STATISTICS</string>
     <string name="clear_all">CLEAR ALL</string>
+    <string name="semicolon">:</string>
+    <string name="clear_scores">CLEAR</string>
+    <string name="score">SCORE</string>
+    <string name="choose">CHOOSE</string>
+    <string name="player_1">PLAYER 1</string>
+    <string name="enter_your_name">Enter your name</string>
+    <string name="player_2">PLAYER 2</string>
+    <string name="play">PLAY</string>
+    <string name="checkbox">checkbox</string>
+    <string name="computer">computer</string>
 </resources>

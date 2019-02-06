@@ -162,8 +162,8 @@ public class FieldFragment extends Fragment implements ChangingFragment {
     }
 
     private class ViewPagerAdapter extends PagerAdapter {
-
         private List<Drawable> fields;
+
         private static final int FIELD_COUNT = 4;
 
         public ViewPagerAdapter() {
@@ -193,7 +193,7 @@ public class FieldFragment extends Fragment implements ChangingFragment {
         @Override
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             View view = getLayoutInflater().inflate(R.layout.view_pager_item, null);
-            ImageView image = view.findViewById(R.id.field_image);
+            ImageView image = view.findViewById(R.id.pager_image);
             image.setImageDrawable(fields.get(position));
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

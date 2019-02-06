@@ -5,7 +5,6 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
-import com.example.pocketsoccer.database.entities.Game;
 import com.example.pocketsoccer.database.entities.Pair;
 import com.example.pocketsoccer.repository.Repository;
 
@@ -23,7 +22,14 @@ public class PairViewModel extends AndroidViewModel {
         return repository.getAllPairs();
     }
 
-    public void deleteAllPairs() {
-        repository.deleteAllPairs();
+    public LiveData<Pair> getPairById(int id) {
+        return repository.getPairById(id);
+    }
+    public void insertPair(Pair pair) {
+        repository.insertPair(pair);
+    }
+
+    public void deleteAllPairs(List<Pair> pairs) {
+        repository.deleteAllPairs(pairs);
     }
 }

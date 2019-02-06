@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/players_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/layout_padding"
+    tools:context=".views.game.PlayersActivity">
+
+    <ImageView
+        android:id="@+id/players_back"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/back"
+        android:src="@drawable/ic_arrow_back_white_24dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/players_topGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/players_bottomGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.85" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/teams_topGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.45" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/player1_leftGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/player1_rightGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.47" />
+
+    <TextView
+        android:id="@+id/player1_title"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/player_1"
+        android:textSize="@dimen/menuText"
+        app:layout_constraintBottom_toTopOf="@id/player1"
+        app:layout_constraintLeft_toLeftOf="@id/player1_leftGuideline"
+        app:layout_constraintRight_toRightOf="@id/player1_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/players_topGuideline" />
+
+    <ImageView
+        android:id="@+id/player1_computer"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/computer"
+        android:src="@drawable/ic_computer_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/player1_title"
+        app:layout_constraintLeft_toLeftOf="@id/player1_checkbox"
+        app:layout_constraintRight_toRightOf="@id/player1_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/player1_title" />
+
+    <EditText
+        android:id="@+id/player1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/white"
+        android:gravity="center_horizontal"
+        android:hint="@string/enter_your_name"
+        android:inputType="text"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@id/teams_topGuideline"
+        app:layout_constraintLeft_toLeftOf="@id/team1_pager"
+        app:layout_constraintRight_toRightOf="@id/team1_pager"
+        app:layout_constraintTop_toBottomOf="@id/player1_title"
+        tools:ignore="Autofill"
+        tools:targetApi="lollipop" />
+
+    <ImageView
+        android:id="@+id/player1_checkbox"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/checkbox"
+        android:src="@drawable/ic_check_box_outline_blank_black_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/player1"
+        app:layout_constraintLeft_toRightOf="@id/team1_pager"
+        app:layout_constraintRight_toRightOf="@id/player1_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/player1" />
+
+    <ImageView
+        android:id="@+id/team1_prev"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/left"
+        android:src="@drawable/ic_chevron_left_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/players_bottomGuideline"
+        app:layout_constraintLeft_toLeftOf="@id/player1_leftGuideline"
+        app:layout_constraintRight_toLeftOf="@id/team1_pager"
+        app:layout_constraintTop_toTopOf="@id/teams_topGuideline" />
+
+    <ImageView
+        android:id="@+id/team1_next"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/right"
+        android:src="@drawable/ic_chevron_right_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/players_bottomGuideline"
+        app:layout_constraintLeft_toRightOf="@id/team1_pager"
+        app:layout_constraintRight_toRightOf="@id/player1_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/teams_topGuideline" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/team1_pager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/players_bottomGuideline"
+        app:layout_constraintLeft_toRightOf="@id/team1_prev"
+        app:layout_constraintRight_toLeftOf="@id/team1_next"
+        app:layout_constraintTop_toTopOf="@id/teams_topGuideline" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/player2_leftGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.53" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/player2_rightGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <TextView
+        android:id="@+id/player2_title"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/player_2"
+        android:textSize="@dimen/menuText"
+        app:layout_constraintBottom_toTopOf="@id/player2"
+        app:layout_constraintLeft_toLeftOf="@id/player2_leftGuideline"
+        app:layout_constraintRight_toRightOf="@id/player2_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/players_topGuideline" />
+
+    <ImageView
+        android:id="@+id/player2_computer"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/computer"
+        android:src="@drawable/ic_computer_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/player2_title"
+        app:layout_constraintLeft_toLeftOf="@id/player2_checkbox"
+        app:layout_constraintRight_toRightOf="@id/player2_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/player2_title" />
+
+    <EditText
+        android:id="@+id/player2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/white"
+        android:gravity="center_horizontal"
+        android:hint="@string/enter_your_name"
+        android:inputType="text"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@id/teams_topGuideline"
+        app:layout_constraintLeft_toLeftOf="@id/team2_pager"
+        app:layout_constraintRight_toRightOf="@id/team2_pager"
+        app:layout_constraintTop_toBottomOf="@id/player2_title"
+        tools:ignore="Autofill"
+        tools:targetApi="lollipop" />
+
+    <ImageView
+        android:id="@+id/player2_checkbox"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/checkbox"
+        android:src="@drawable/ic_check_box_outline_blank_black_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/player2"
+        app:layout_constraintLeft_toRightOf="@id/team2_pager"
+        app:layout_constraintRight_toRightOf="@id/player2_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/player2" />
+
+    <ImageView
+        android:id="@+id/team2_prev"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/left"
+        android:src="@drawable/ic_chevron_left_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/players_bottomGuideline"
+        app:layout_constraintLeft_toLeftOf="@id/player2_leftGuideline"
+        app:layout_constraintRight_toLeftOf="@id/team2_pager"
+        app:layout_constraintTop_toTopOf="@id/teams_topGuideline" />
+
+    <ImageView
+        android:id="@+id/team2_next"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:contentDescription="@string/right"
+        android:src="@drawable/ic_chevron_right_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/players_bottomGuideline"
+        app:layout_constraintLeft_toRightOf="@id/team2_pager"
+        app:layout_constraintRight_toRightOf="@id/player2_rightGuideline"
+        app:layout_constraintTop_toTopOf="@id/teams_topGuideline" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/team2_pager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/players_bottomGuideline"
+        app:layout_constraintLeft_toRightOf="@id/team2_prev"
+        app:layout_constraintRight_toLeftOf="@id/team2_next"
+        app:layout_constraintTop_toTopOf="@id/teams_topGuideline" />
+
+    <TextView
+        android:id="@+id/play"
+        style="@style/shadoweffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/play"
+        android:textSize="@dimen/menuText"
+        app:layout_constraintLeft_toLeftOf="@id/player1_leftGuideline"
+        app:layout_constraintRight_toRightOf="@id/player2_rightGuideline"
+        app:layout_constraintTop_toBottomOf="@id/players_bottomGuideline" />
+
+</android.support.constraint.ConstraintLayout>

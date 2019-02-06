@@ -11,7 +11,7 @@ public class SettingsPreferences {
 
     private SharedPreferences preferences;
 
-    public SettingsPreferences() {
+    private SettingsPreferences() {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 

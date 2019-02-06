@@ -13,14 +13,14 @@ import java.util.List;
 @Dao
 public interface PairDao {
     @Query("SELECT * FROM pair")
-    LiveData<List<Pair>> getAll();
+    LiveData<List<Pair>> getAllPairs();
+
+    @Query("SELECT * FROM pair WHERE id=:id")
+    LiveData<Pair> getPairById(int id);
 
     @Insert
-    void insert(Pair pair);
+    void insertPair(Pair pair);
 
     @Delete
-    void delete(Pair pair);
-
-    @Delete
-    void deleteAll(List<Pair> pairs);
+    void deleteAllPairs(List<Pair> pairs);
 }

@@ -18,7 +18,23 @@ public class GameViewModel extends AndroidViewModel {
         repository = new Repository(application);
     }
 
-    public LiveData<List<Game>> getAllGames() {
-        return repository.getAllGames();
+    public LiveData<List<Game>> getAllGamesOfPair(int pairId) {
+        return repository.getAllGamesOfPair(pairId);
+    }
+
+    public LiveData<Integer> getPlayer1WinsOfPair(int pairId) {
+        return repository.getPlayer1WinsOfPair(pairId);
+    }
+
+    public LiveData<Integer> getPlayer2WinsOfPair(int pairId) {
+        return repository.getPlayer2WinsOfPair(pairId);
+    }
+
+    public void insertGame(final Game game) {
+        repository.insertGame(game);
+    }
+
+    public void deleteGames(final List<Game> games) {
+        repository.deleteGames(games);
     }
 }

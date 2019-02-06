@@ -148,14 +148,6 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         selectedOption = option;
     }
 
-    private void setMatch(int s, boolean andSlider) {
-        /*speed = s;
-        value.setText("" + speed);
-        if (andSlider) {
-            slider.setProgress(speed);
-        }*/
-    }
-
     private void loadSettings() {
         int defaultMatch = preferences.getIntSetting("defaultMatch", 0);
         if (defaultMatch == 0) { // Only first time

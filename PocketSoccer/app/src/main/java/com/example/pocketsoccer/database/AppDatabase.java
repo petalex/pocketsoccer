@@ -43,12 +43,13 @@ public abstract class AppDatabase extends RoomDatabase {
             Pair pair = new Pair();
             pair.player1 = "petalex";
             pair.player2 = "djekatore";
-            pairDao.insert(pair);
+            pairDao.insertPair(pair);
             Game game = new Game();
             game.pairId = 1;
-            game.score1 = 1;
+            game.time = 154;
+            game.score1 = 2;
             game.score2 = 1;
-            gameDao.insert(game);
+            gameDao.insertGame(game);
             return null;
         }
     }
