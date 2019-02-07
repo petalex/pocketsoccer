@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".views.game.PlayersActivity"
+            android:name=".views.PlayersActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
             android:name=".views.game.GameActivity"

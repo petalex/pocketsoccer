@@ -1,4 +1,4 @@
-package com.example.pocketsoccer.views.game;
+package com.example.pocketsoccer.views;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.pocketsoccer.R;
+import com.example.pocketsoccer.views.game.GameActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -227,14 +228,14 @@ public class PlayersActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String player1Name = player1.getText().toString();
                 String player2Name = player2.getText().toString();
-                if (player1Name.equals("")) {
+                /*if (player1Name.equals("")) {
                     Toast.makeText(v.getContext(), "Please enter Player 1's name!", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (player2Name.equals("")) {
                     Toast.makeText(v.getContext(), "Please enter Player 2's name!", Toast.LENGTH_SHORT).show();
                     return;
-                }
+                }*/
                 Intent gameIntent = new Intent(v.getContext(), GameActivity.class);
                 gameIntent.putExtra("new", true);
                 gameIntent.putExtra("player1", player1Name);

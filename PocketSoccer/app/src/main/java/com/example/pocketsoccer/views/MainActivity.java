@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.pocketsoccer.R;
-import com.example.pocketsoccer.views.game.PlayersActivity;
 import com.example.pocketsoccer.views.settings.SettingsActivity;
 import com.example.pocketsoccer.views.statistics.StatisticsActivity;
 
