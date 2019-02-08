@@ -48,6 +48,8 @@ public class GameActivity extends AppCompatActivity implements View.OnTouchListe
             game.setTeam2(team2);
             Drawable ball = Drawable.createFromStream(getAssets().open("balls/ball.png"), null);
             game.setBall(ball);
+            Drawable goals = Drawable.createFromStream(getAssets().open("fields/fieldgoals.png"), null);
+            game.setGoals(goals);
         } catch (IOException e) {
             e.printStackTrace();
         }

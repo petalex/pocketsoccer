@@ -2,6 +2,7 @@ package com.example.pocketsoccer.views.game;
 
 import android.os.AsyncTask;
 
+import com.example.pocketsoccer.views.game.figures.Figure;
 import com.example.pocketsoccer.views.game.figures.Player;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public class MoveDetector {
 
     private Timer moveTimer;
 
-    private Player touchedPlayer;
+    private Figure touchedPlayer;
 
     private float downX, downY;
 
@@ -39,8 +40,9 @@ public class MoveDetector {
 
     public void up(float x, float y) {
         if (touchedPlayer != null) {
-            touchedPlayer.initMove(x - downX, y - downY, game.getWidth(), game.getHeight(), speed);
+            touchedPlayer.initMove(x - downX, y - downY, speed);
             startMovement();
+            game.swapTeamOnMove();
         }
     }
 
@@ -48,22 +50,10 @@ public class MoveDetector {
         game.invalidate();
     }
 
-    private Player findTouchedPlayer(float x, float y) {
-        List<Player> team;
-
-        team = game.getData().getTeam1();
+    private Figure findTouchedPlayer(float x, float y) {
+        List<Figure> team = game.getData().getTeamOnMove();
         for (int i = 0; i < GameData.N; ++i) {
-            Player player = team.get(i);
-            if (isTouched(player, x, y)) {
-                downX = x;
-                downY = y;
-                return player;
-            }
-        }
-
-        team = game.getData().getTeam2();
-        for (int i = 0; i < GameData.N; ++i) {
-            Player player = team.get(i);
+            Figure player = team.get(i);
             if (isTouched(player, x, y)) {
                 downX = x;
                 downY = y;
@@ -74,8 +64,8 @@ public class MoveDetector {
         return null;
     }
 
-    private boolean isTouched(Player player, float x, float y) {
-        return getDistance(player.getX(), player.getY(), x, y) <= Player.R;
+    private boolean isTouched(Figure player, float x, float y) {
+        return getDistance(player.getX(), player.getY(), x, y) <= player.getR();
     }
 
     private float getDistance(float x1, float y1, float x2, float y2) {
