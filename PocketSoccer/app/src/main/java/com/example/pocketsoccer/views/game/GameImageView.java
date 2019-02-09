@@ -3,17 +3,25 @@ package com.example.pocketsoccer.views.game;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.UiThread;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import com.example.pocketsoccer.R;
+import com.example.pocketsoccer.utils.GameInfoManager;
+import com.example.pocketsoccer.utils.ImageManager;
+import com.example.pocketsoccer.utils.SoundManager;
 import com.example.pocketsoccer.views.game.figures.Ball;
 import com.example.pocketsoccer.views.game.figures.Figure;
 import com.example.pocketsoccer.views.game.figures.Player;
+import com.example.pocketsoccer.views.game.timers.MatchTimer;
+import com.example.pocketsoccer.views.game.timers.MoveTimer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +32,11 @@ public class GameImageView extends ImageView {
 
     private MoveDetector detector;
 
-    private Drawable team1, team2, ball, goals;
+    private GameActivity listener;
 
-    private int teamOnMove;
+    private Drawable team1, team2, ball, goals, selectedPlayer;
 
-    private boolean draw = false, reset = false;
+    private boolean init = true, enabled = false, reset = false, computer = false;
 
     public GameImageView(Context context) {
         super(context);
@@ -53,7 +61,83 @@ public class GameImageView extends ImageView {
     public void init() {
         data = new GameData();
         detector = new MoveDetector(this);
+        MoveTimer.init(this);
+        MatchTimer.init(this);
+    }
+
+    public void release() {
+        MoveTimer.release();
+        MatchTimer.release();
+    }
+
+    public void initDrawables() {
+        team1 = ImageManager.getTeam(GameInfoManager.getTeam1());
+        team2 = ImageManager.getTeam(GameInfoManager.getTeam2());
+        ball = ImageManager.getBall();
+        goals = ImageManager.getGoals();
+        selectedPlayer = ImageManager.getSelectedPlayer();
+    }
+
+    public void start(boolean newGame) {
+        MatchTimer.setTimer();
+
         setTeam1OnMove();
+
+        enabled = true;
+        MoveTimer.setTimer();
+        MatchTimer.unpauseTimer();
+
+        reset = newGame; // Only reset data when new game
+        invalidate();
+    }
+
+    public void reset() {
+        enabled = true;
+        MoveTimer.setTimer();
+        MatchTimer.unpauseTimer();
+
+
+        reset = true;
+        invalidate();
+    }
+
+    public void unfreeze() {
+        enabled = true;
+        MoveTimer.unpauseTimer();
+        MatchTimer.unpauseTimer();
+    }
+
+    public void freeze() {
+        enabled = false;
+        MoveTimer.pauseTimer();
+        MatchTimer.pauseTimer();
+    }
+
+    public void swapTeamOnMove() {
+        switch (GameInfoManager.getTeamOnMove()) {
+            case 1:
+                setTeam2OnMove();
+                break;
+            case 2:
+                setTeam1OnMove();
+                break;
+        }
+    }
+
+    public void gameOver() {
+        Runnable finish = new Runnable() {
+            @Override
+            public void run() {
+                SoundManager.whistleSound();
+            }
+        };
+        SoundManager.whistleSound();
+        Handler handler1 = new Handler();
+        handler1.postDelayed(finish, 1000);
+        Handler handler2 = new Handler();
+        handler2.postDelayed(finish, 1000);
+
+        listener.gameOver();
     }
 
     public GameData getData() {
@@ -64,76 +148,59 @@ public class GameImageView extends ImageView {
         return detector;
     }
 
-    public void setSpeed(int speed) {
-        detector.setSpeed(speed);
-    }
-
-    public void setTeam1(Drawable team1) {
-
-        this.team1 = team1;
-    }
-
-    public void setTeam2(Drawable team2) {
-        this.team2 = team2;
-    }
-
-    public void setBall(Drawable ball) {
-        this.ball = ball;
-    }
-
-    public void setGoals(Drawable goals) {
-        this.goals = goals;
-    }
-
-    public void start() {
-        draw = true;
-        reset = true;
-        invalidate();
-    }
-
-    public void stop() {
-        draw = false;
-    }
-
-    public void swapTeamOnMove() {
-        switch (teamOnMove) {
-            case 1:
-                setTeam2OnMove();
-                break;
-            case 2:
-                setTeam1OnMove();
-                break;
-        }
+    public void setOnGameOverListener(GameActivity listener) {
+        this.listener = listener;
     }
 
     public void setTeam1OnMove() {
-        teamOnMove = 1;
-        data.setTeamOnMove(data.getTeam1());
+        GameInfoManager.setTeamOnMove(1);
+        if (GameInfoManager.isComputer1()) {
+            data.setTeamOnMove(null);
+            computer = true;
+            invalidate();
+        } else {
+            data.setTeamOnMove(data.getTeam1());
+        }
     }
 
     public void setTeam2OnMove() {
-        teamOnMove = 2;
+        GameInfoManager.setTeamOnMove(2);
         data.setTeamOnMove(data.getTeam2());
+        if (GameInfoManager.isComputer2()) {
+            data.setTeamOnMove(null);
+            computer = true;
+            invalidate();
+        } else {
+            data.setTeamOnMove(data.getTeam2());
+        }
     }
 
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        if (draw) {
-            if (reset) {
-                data.reset(getWidth(), getHeight(), teamOnMove);
-                reset = false;
-            }
+        if (reset) {
+            data.reset(getWidth(), getHeight());
+            reset = false;
+        }
+        if (init) {
+            // Only true for a first time
+            data.loadStaticData(getWidth(), getHeight());
+            init = false;
+        }
+        if (computer) {
+            // Execute computer's move on main thread
+            computerMove();
+            computer = false;
+        }
+        if (enabled) {
             if (move()) {
                 resolveCollisions();
             } else {
                 endMovement();
             }
-
             checkForGoal();
-
-            drawGame(canvas);
         }
+        drawGame(canvas);
     }
 
     private boolean move() {
@@ -164,6 +231,7 @@ public class GameImageView extends ImageView {
     }
 
     private void resolveBallVsBallCollisions() {
+        boolean ballHit = false;
         List<Figure> figures = new ArrayList<>();
         figures.addAll(data.getTeam1());
         figures.addAll(data.getTeam2());
@@ -174,9 +242,15 @@ public class GameImageView extends ImageView {
                     if (inContact(figure1, figure2)) {
                         staticResolution(figure1, figure2);
                         //dynamicResolution(figure1, figure2);
+                        if (figure1 instanceof Ball || figure2 instanceof Ball) {
+                            ballHit = true;
+                        }
                     }
                 }
             }
+        }
+        if (ballHit) {
+            SoundManager.bounceSound();
         }
     }
 
@@ -192,11 +266,36 @@ public class GameImageView extends ImageView {
     }
 
     private void egdesResolution(Figure figure) {
-        if (figure.getX() - figure.getR() <= 0.005f * getWidth() || figure.getX() + figure.getR() >= 0.995f * getWidth()) {
-            figure.setDx(-1.0f * figure.getDx());
+        if (figure.getX() - figure.getR() <= 0) {
+            figure.setX(figure.getX() + Math.abs(figure.getDx()));
+            figure.setDx(Figure.L * Math.abs(figure.getDx()));
+            if (figure instanceof Ball) {
+                SoundManager.bounceSound();
+            }
         }
-        if (figure.getY() - figure.getR() <= 0.015f * getHeight() || figure.getY() + figure.getR() >= 0.985f * getHeight()) {
-            figure.setDy(-1.0f * figure.getDy());
+
+        if (figure.getX() + figure.getR() >= getWidth()) {
+            figure.setX(figure.getX() - Math.abs(figure.getDx()));
+            figure.setDx(-Figure.L * Math.abs(figure.getDx()));
+            if (figure instanceof Ball) {
+                SoundManager.bounceSound();
+            }
+        }
+
+        if (figure.getY() - figure.getR() <= 0){
+            figure.setY(figure.getY() + Math.abs(figure.getDy()));
+            figure.setDy(Figure.L * Math.abs(figure.getDy()));
+            if (figure instanceof Ball) {
+                SoundManager.bounceSound();
+            }
+        }
+
+        if (figure.getY() + figure.getR() >= getHeight()) {
+            figure.setY(figure.getY() - Math.abs(figure.getDy()));
+            figure.setDy(-Figure.L * Math.abs(figure.getDy()));
+            if (figure instanceof Ball) {
+                SoundManager.bounceSound();
+            }
         }
     }
 
@@ -208,72 +307,102 @@ public class GameImageView extends ImageView {
     }
 
     private void leftGoalResolution(Figure figure, RectF goal) {
-        float delta = (float) Math.sqrt(figure.getDx() * figure.getDx() + figure.getDy() * figure.getDy());
+        float dx = figure.getDx(), dy = figure.getDy();
+        float delta = (float) Math.sqrt(dx * dx + dy * dy);
         float distanceTopRight = getDistance(figure, new Ball(new PointF(goal.right, goal.top)));
         float distanceBottomRight = getDistance(figure, new Ball(new PointF(goal.right, goal.bottom)));
-
         if (goal.right <= figure.getX()) {
             // Top right corner
-            if (figure.getR() <= distanceTopRight && distanceTopRight <= figure.getR() + delta) {
-                figure.setDx(Math.abs(figure.getDx()));
-                figure.setDy(-1.0f * figure.getDy());
-                return;
+            if (figure.getY() <= goal.top) {
+                if (figure.getR() - delta <= distanceTopRight && distanceTopRight <= figure.getR()) {
+                    figure.setX(figure.getX() + Math.abs(figure.getDx()));
+                    figure.setY(figure.getY() - Math.abs(figure.getDy()));
+                    figure.setDx(Figure.L * Math.abs(figure.getDx()));
+                    figure.setDy(-Figure.L * Math.abs(figure.getDy()));
+                    return;
+                }
             }
             // Bottom right corner
-            if (figure.getR() <= distanceBottomRight && distanceBottomRight <= figure.getR() + delta) {
+            if (goal.bottom <= figure.getY()) {
+                if (figure.getR() - delta <= distanceBottomRight && distanceBottomRight <= figure.getR()) {
+                    figure.setX(figure.getX() + Math.abs(figure.getDx()));
+                    figure.setY(figure.getY() + Math.abs(figure.getDy()));
+                    figure.setDx(Figure.L * Math.abs(figure.getDx()));
+                    figure.setDy(Figure.L * Math.abs(figure.getDy()));
+                    return;
+                }
+            }
+        }
+        if (goal.right + figure.getR() - Math.abs(dx) <= figure.getX() && figure.getX() <= goal.right + figure.getR() && dx < 0) {
+            // Right edge
+            if (goal.top <= figure.getY() && figure.getY() < goal.bottom) {
+                figure.setX(figure.getX() + Math.abs(figure.getDx()));
                 figure.setDx(Math.abs(figure.getDx()));
-                figure.setDy(-1.0f * figure.getDy());
                 return;
             }
-        } else if (goal.right + figure.getR() - Math.abs(figure.getDx()) <= figure.getX() && figure.getX() <= goal.right + figure.getR() &&
-                goal.top <= figure.getY() && figure.getY() < goal.bottom) { // Right edge
-            figure.setDx(-1.0f * figure.getDx());
-            return;
-        } else if (goal.left + figure.getR() <= figure.getX() && figure.getX() < goal.right) {
+        }
+        if (goal.left + figure.getR() <= figure.getX() && figure.getX() < goal.right) {
             // Top edge
-            if (goal.top - figure.getR() <= figure.getY() && figure.getY() <= goal.top - figure.getR() + Math.abs(figure.getDy())) {
-                figure.setDy(-1.0f * figure.getDy());
+            if (goal.top - figure.getR() <= figure.getY() && figure.getY() <= goal.top - figure.getR() + Math.abs(dy) && dy > 0) {
+                figure.setY(figure.getY() - Math.abs(figure.getDy()));
+                figure.setDy(-Figure.L * Math.abs(figure.getDy()));
                 return;
             }
             // Bottom edge
-            if (goal.bottom + figure.getR() - Math.abs(figure.getDy()) <= figure.getY() && figure.getY() <= goal.bottom + figure.getR()) {
-                figure.setDy(-1.0f * figure.getDy());
+            if (goal.bottom + figure.getR() - Math.abs(dy) <= figure.getY() && figure.getY() <= goal.bottom + figure.getR() && dy < 0) {
+                figure.setY(figure.getY() + Math.abs(dy));
+                figure.setDy(Figure.L * Math.abs(dy));
                 return;
             }
         }
     }
 
     private void rightGoalResolution(Figure figure, RectF goal) {
-        float delta = (float) Math.sqrt(figure.getDx() * figure.getDx() + figure.getDy() * figure.getDy());
+        float dx = figure.getDx(), dy = figure.getDy();
+        float delta = (float) Math.sqrt(dx * dx + dy * dy);
         float distanceTopLeft = getDistance(figure, new Ball(new PointF(goal.left, goal.top)));
         float distanceBottomLeft = getDistance(figure, new Ball(new PointF(goal.left, goal.bottom)));
-
         if (figure.getX() <= goal.left) {
             // Top left corner
-            if (figure.getR() <= distanceTopLeft && distanceTopLeft <= figure.getR() + delta) {
-                figure.setDx(-Math.abs(figure.getDx()));
-                figure.setDy(-1.0f * figure.getDy());
-                return;
+            if (figure.getY() <= goal.top) {
+                if (figure.getR() - delta <= distanceTopLeft && distanceTopLeft <= figure.getR()) {
+                    figure.setX(figure.getX() - Math.abs(figure.getDx()));
+                    figure.setY(figure.getY() - Math.abs(figure.getDy()));
+                    figure.setDx(-Figure.L * Math.abs(figure.getDx()));
+                    figure.setDy(-Figure.L * Math.abs(figure.getDy()));
+                    return;
+                }
             }
             // Bottom left corner
-            if (figure.getR() <= distanceBottomLeft && distanceBottomLeft <= figure.getR() + delta) {
+            if (goal.bottom <= figure.getY()) {
+                if (figure.getR() - delta <= distanceBottomLeft && distanceBottomLeft <= figure.getR()) {
+                    figure.setX(figure.getX() - Math.abs(figure.getDx()));
+                    figure.setY(figure.getY() + Math.abs(figure.getDy()));
+                    figure.setDx(-Figure.L * Math.abs(figure.getDx()));
+                    figure.setDy(Figure.L * Math.abs(figure.getDy()));
+                    return;
+                }
+            }
+        }
+        if (goal.left + figure.getR() <= figure.getX() && figure.getX() <= goal.left + figure.getR() + Math.abs(dx) && dx > 0) {
+            // Left edge
+            if (goal.top <= figure.getY() && figure.getY() < goal.bottom) {
+                figure.setX(figure.getX() - Math.abs(figure.getDx()));
                 figure.setDx(-Math.abs(figure.getDx()));
-                figure.setDy(-1.0f * figure.getDy());
                 return;
             }
-        } else if (goal.left - figure.getR() + Math.abs(figure.getDx()) <= figure.getX() && figure.getX() <= goal.left - figure.getR() &&
-                goal.top <= figure.getY() && figure.getY() < goal.bottom) { // Left edge
-            figure.setDx(-1.0f * figure.getDx());
-            return;
-        } else if (goal.left < figure.getX() && figure.getX() <= goal.right - figure.getR()) {
+        }
+        if (goal.left <= figure.getX() && figure.getX() < goal.right - figure.getR()) {
             // Top edge
-            if (goal.top - figure.getR() <= figure.getY() && figure.getY() <= goal.top - figure.getR() + Math.abs(figure.getDy())) {
-                figure.setDy(-1.0f * figure.getDy());
+            if (goal.top - figure.getR() <= figure.getY() && figure.getY() <= goal.top - figure.getR() + Math.abs(dy) && dy > 0) {
+                figure.setY(figure.getY() - Math.abs(figure.getDy()));
+                figure.setDy(-Figure.L * Math.abs(figure.getDy()));
                 return;
             }
             // Bottom edge
-            if (goal.bottom + figure.getR() - Math.abs(figure.getDy()) <= figure.getY() && figure.getY() <= goal.bottom + figure.getR()) {
-                figure.setDy(-1.0f * figure.getDy());
+            if (goal.bottom + figure.getR() - Math.abs(dy) <= figure.getY() && figure.getY() <= goal.bottom + figure.getR() && dy < 0) {
+                figure.setY(figure.getY() + Math.abs(dy));
+                figure.setDy(Figure.L * Math.abs(dy));
                 return;
             }
         }
@@ -328,32 +457,61 @@ public class GameImageView extends ImageView {
         // Team 1's goal
         RectF goal1Top = data.getGoals().get(0);
         RectF goal1Bottom = data.getGoals().get(1);
-        if (goal1Top.left + ball.getR() < ball.getX() && ball.getX() < goal1Top.right -  ball.getR() / 2 &&
-                 goal1Top.bottom + ball.getR() < ball.getY() && ball.getY() < goal1Bottom.top - ball.getR()) {
-            stop();
-            Toast.makeText(getContext(), "Goal for Team 2!", Toast.LENGTH_SHORT).show();
-            setTeam1OnMove();
-            start();
-
+        if (goal1Top.left + ball.getR() < ball.getX() && ball.getX() < goal1Top.right - ball.getR() &&
+                goal1Top.bottom + ball.getR() < ball.getY() && ball.getY() < goal1Bottom.top - ball.getR()) {
+            SoundManager.crowdSound();
+            freeze();
+            Runnable restart = new Runnable() {
+                @Override
+                public void run() {
+                    setTeam1OnMove();
+                    GameInfoManager.addToScore2();
+                    if (GameInfoManager.getMatchType().equals("goals") &&
+                            GameInfoManager.getScore2() == GameInfoManager.getMatch()) {
+                        gameOver();
+                    } else {
+                        SoundManager.whistleSound();
+                        reset();
+                    }
+                }
+            };
+            Handler handler = new Handler();
+            handler.postDelayed(restart, 1000);
         }
         // Team 2's goal
         RectF goal2Top = data.getGoals().get(2);
         RectF goal2Bottom = data.getGoals().get(3);
-        if (ball.getX() - ball.getR() / 2 > goal2Top.left && ball.getX() + ball.getR() < goal2Top.right &&
+        if (ball.getX() - ball.getR() > goal2Top.left && ball.getX() + ball.getR() < goal2Top.right &&
                 ball.getY() - ball.getR() > goal2Top.bottom && ball.getY() + ball.getR() < goal2Bottom.top) {
-            stop();
-            Toast.makeText(getContext(), "Goal for Team 1!", Toast.LENGTH_SHORT).show();
-            setTeam2OnMove();
-            start();
+            SoundManager.crowdSound();
+            freeze();
+            Runnable restart = new Runnable() {
+                @Override
+                public void run() {
+                    SoundManager.whistleSound();
+                    setTeam2OnMove();
+                    GameInfoManager.addToScore1();
+                    if (GameInfoManager.getMatchType().equals("goals") &&
+                            GameInfoManager.getScore1() == GameInfoManager.getMatch()) {
+                        gameOver();
+                    } else {
+                        reset();
+                    }
+                }
+            };
+            Handler handler = new Handler();
+            handler.postDelayed(restart, 1000);
         }
     }
 
     private void drawGame(Canvas canvas) {
         drawCrests(canvas);
+        drawMoveTime(canvas);
         drawTeam(canvas, data.getTeam1(), team1);
         drawTeam(canvas, data.getTeam2(), team2);
-        drawBall(canvas, ball);
-        drawGoals(canvas, goals);
+        drawBall(canvas);
+        drawGoals(canvas);
+        drawResult(canvas);
     }
 
     private void drawCrests(Canvas canvas) {
@@ -361,15 +519,26 @@ public class GameImageView extends ImageView {
         float height = width;
         float startX = (0.5f * getWidth() - width) / 2;
         float startY = (getHeight() - height) / 2;
+
+        switch (GameInfoManager.getTeamOnMove()) {
+            case 1:
+                team1.setAlpha(150);
+                team2.setAlpha(50);
+                break;
+            case 2:
+                team1.setAlpha(50);
+                team2.setAlpha(150);
+                break;
+        }
+
         team1.setBounds(
                 (int) (startX),
                 (int) (startY),
                 (int) (startX + width),
                 (int) (startY + height)
         );
-        team1.setAlpha(50 + ((teamOnMove == 1) ? 100 : 0));
         team1.draw(canvas);
-        team1.setAlpha(255);
+
         startX += 0.5f * getWidth();
         team2.setBounds(
                 (int) (startX),
@@ -377,46 +546,257 @@ public class GameImageView extends ImageView {
                 (int) (startX + width),
                 (int) (startY + height)
         );
-        team2.setAlpha(50 + ((teamOnMove == 2) ? 100 : 0));
         team2.draw(canvas);
+
+        team1.setAlpha(255);
         team2.setAlpha(255);
     }
 
-    private void drawTeam(Canvas canvas, List<Figure> team, Drawable drawable) {
+    private void drawTeam(Canvas canvas, List<Figure> team, Drawable teamDrawable) {
         for (int i = 0; i < GameData.N; ++i) {
-            drawPlayer(canvas, team.get(i), drawable);
+            drawPlayer(canvas, team.get(i), teamDrawable);
         }
     }
 
-    private void drawPlayer(Canvas canvas, Figure player, Drawable drawable) {
-        drawable.setBounds(
+    private void drawPlayer(Canvas canvas, Figure player, Drawable teamDrawable) {
+        if (player == data.getSelectedPlayer()) {
+            selectedPlayer.setBounds(
+                    (int) (player.getX() - Player.R * 1.75f),
+                    (int) (player.getY() - Player.R * 1.75f),
+                    (int) (player.getX() + Player.R * 1.75f),
+                    (int) (player.getY() + Player.R * 1.75f)
+            );
+            selectedPlayer.draw(canvas);
+        }
+        teamDrawable.setBounds(
                 (int) (player.getX() - Player.R),
                 (int) (player.getY() - Player.R),
                 (int) (player.getX() + Player.R),
                 (int) (player.getY() + Player.R)
         );
-        drawable.draw(canvas);
+        teamDrawable.draw(canvas);
     }
 
-    private void drawBall(Canvas canvas, Drawable drawable) {
-        Figure ball = data.getBall();
-        drawable.setBounds(
-                (int) (ball.getX() - Ball.R),
-                (int) (ball.getY() - Ball.R),
-                (int) (ball.getX() + Ball.R),
-                (int) (ball.getY() + Ball.R)
+    private void drawBall(Canvas canvas) {
+        Figure ballFigure = data.getBall();
+        ball.setBounds(
+                (int) (ballFigure.getX() - Ball.R),
+                (int) (ballFigure.getY() - Ball.R),
+                (int) (ballFigure.getX() + Ball.R),
+                (int) (ballFigure.getY() + Ball.R)
         );
-        drawable.draw(canvas);
+        ball.draw(canvas);
     }
 
-    private void drawGoals(Canvas canvas, Drawable drawable) {
-        drawable.setBounds(0, 0, getWidth(), getHeight());
-        drawable.draw(canvas);
-        /*Paint paint = new Paint();
+    private void drawGoals(Canvas canvas) {
+        goals.setBounds(0, 0, getWidth(), getHeight());
+        goals.draw(canvas);
+    }
+
+    private void drawResult(Canvas canvas) {
+        Paint paint = new Paint();
+
+        float a = 0.4f * getWidth();
+        float b = 0.1f * getHeight();
+        float left = (getWidth() - a) / 2;
+        float top = 0.05f * getHeight();
+        RectF scoreboard = new RectF(left, top, left + a, top + b);
+
+        // Main rect
+        paint.setColor(Color.WHITE);
+        paint.setAlpha(200);
+        canvas.drawRoundRect(scoreboard, b / 4, b / 2, paint);
+
+        // Border rect rect
+        paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(data.getGoals().get(0), paint);
-        canvas.drawRect(data.getGoals().get(1), paint);
-        canvas.drawRect(data.getGoals().get(2), paint);
-        canvas.drawRect(data.getGoals().get(3), paint);*/
+        paint.setStrokeWidth(0.025f * b);
+        canvas.drawRoundRect(scoreboard, b / 4, b / 2, paint);
+
+        if (GameInfoManager.isComputer1()) {
+            // Computer icon for player 1
+            Drawable computer = getResources().getDrawable(R.drawable.ic_computer_white_24dp);
+            computer.mutate();
+            computer.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
+            computer.setAlpha(200);
+            computer.setBounds(
+                    (int) (left + 0.05f * a),
+                    (int) (top + 0.3f * b),
+                    (int) (left + 0.05f * a + 0.4f * b),
+                    (int) (top + 0.7f * b)
+            );
+            computer.draw(canvas);
+        }
+
+        // Team 1 crest
+        team1.setBounds(
+                (int) (left + 0.15f * a),
+                (int) (top + 0.1f * b),
+                (int) (left + 0.15f * a + 0.8f * b),
+                (int) (top + 0.9f * b)
+        );
+        team1.draw(canvas);
+
+        // Player 1 score
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(0.7f * b);
+        paint.setTextAlign(Paint.Align.RIGHT);
+        canvas.drawText("" + GameInfoManager.getScore1(), left + 0.45f * a, top + 0.75f * b, paint);
+
+        // Middle line
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(0.005f * a);
+        canvas.drawLine(left + 0.5f * a, top + 0.2f * b, left + 0.5f * a, top + 0.8f * b, paint);
+
+        // Player 2 score
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(0.7f * b);
+        paint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("" + GameInfoManager.getScore2(), left + 0.55f * a, top + 0.75f * b, paint);
+
+        // Team 2 crest
+        team2.setBounds(
+                (int) (left + 0.85f * a - 0.8f * b),
+                (int) (top + 0.1f * b),
+                (int) (left + 0.85f * a),
+                (int) (top + 0.9f * b)
+        );
+        team2.draw(canvas);
+
+        if (GameInfoManager.isComputer2()) {
+            // Computer icon for player 2
+            Drawable computer = getResources().getDrawable(R.drawable.ic_computer_white_24dp);
+            computer.mutate();
+            computer.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
+            computer.setAlpha(200);
+            computer.setBounds(
+                    (int) (left + 0.95f * a - 0.4f * b),
+                    (int) (top + 0.3f * b),
+                    (int) (left + 0.95f * a),
+                    (int) (top + 0.7f * b)
+            );
+            computer.draw(canvas);
+        }
+
+        // Match time
+        a = a / 4;
+        b = 2 * b / 3;
+        left = (getWidth() - a) / 2;
+        top = top + 3 * b / 2;
+        RectF timeboard = new RectF(left, top, left + a, top + b);
+
+        // Main rect
+        paint.setColor(Color.DKGRAY);
+        paint.setAlpha(200);
+        canvas.drawRoundRect(timeboard, b / 4, b / 2, paint);
+
+        // Border rect rect
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(0.025f * b);
+        canvas.drawRoundRect(timeboard, b / 4, b / 2, paint);
+
+        paint.setColor(Color.WHITE);
+        // Time minutes
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(0.7f * b);
+        paint.setTextAlign(Paint.Align.RIGHT);
+        canvas.drawText(timeToString(GameInfoManager.getTime() / 60), left + 0.45f * a, top + 0.75f * b, paint);
+
+        // Semicolon
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(0.7f * b);
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText(":", left + 0.5f * a, top + 0.75f * b, paint);
+
+        // Time seconds
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(0.7f * b);
+        paint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText(timeToString(GameInfoManager.getTime() % 60), left + 0.55f * a, top + 0.75f * b, paint);
+    }
+
+    private String timeToString(int time) {
+        if (time < 10) {
+            return "0" + time;
+        }
+        return "" + time;
+    }
+
+    private void drawMoveTime(Canvas canvas) {
+        Paint paint = new Paint();
+
+        float b = 0.3f * getHeight();
+        float a = b;
+        float left = (getWidth() - a) / 2;
+        float top = (getHeight() - b) / 2;
+
+        // Time to move
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.WHITE);
+        paint.setAlpha(150);
+        paint.setTextSize(b);
+        paint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("" + MoveTimer.getMoveTime(), left + 0.2f * b, top + 0.85f * b, paint);
+    }
+
+    private void computerMove() {
+        // Randomly pick player from a team
+        final int player = (int) (GameData.N * Math.random());
+
+        Runnable afterPicking = new Runnable() {
+            @Override
+            public void run() {
+                // Player picked
+                Figure figure = null;
+                switch (GameInfoManager.getTeamOnMove()) {
+                    case 1:
+                        figure = data.getTeam1().get(player);
+                        break;
+                    case 2:
+                        figure = data.getTeam2().get(player);
+                        break;
+                }
+                data.setSelectedPlayer(figure);
+                invalidate();
+            }
+        };
+
+        Runnable afterWaiting = new Runnable() {
+            @Override
+            public void run() {
+                // Player picked
+                Figure figure = null;
+                switch (GameInfoManager.getTeamOnMove()) {
+                    case 1:
+                        figure = data.getTeam1().get(player);
+                        break;
+                    case 2:
+                        figure = data.getTeam2().get(player);
+                        break;
+                }
+                // Move picked player towards the ball after waiting
+                Figure ball = data.getBall();
+                //float D = getDistance(figure, ball);
+                float dx = (float) ((0.5f + Math.random()) * (ball.getX() - figure.getX()));
+                float dy = (float) ((0.5f + Math.random()) * (ball.getY() - figure.getY()));
+
+                figure.initMove(dx, dy);
+                detector.startMovement();
+                data.setSelectedPlayer(null);
+                swapTeamOnMove();
+                MoveTimer.setTimer();
+            }
+        };
+
+        // Wait between 10 - 40 % of move to pick a player
+        float timeToPickPlayer = (float) (0.1f * MoveTimer.MOVE_TIME + 0.3f * MoveTimer.MOVE_TIME * Math.random());
+        Handler pickingHandler = new Handler();
+        pickingHandler.postDelayed(afterPicking, (long) timeToPickPlayer * 1000);
+
+        // Wait between 10 - 40 % of move to init player's move after picking the player
+        float timeToMovePlayer = (float) (0.1f * MoveTimer.MOVE_TIME + 0.3f * MoveTimer.MOVE_TIME * Math.random());
+        Handler moveHandler = new Handler();
+        moveHandler.postDelayed(afterWaiting, (long) (timeToPickPlayer + timeToMovePlayer) * 1000);
     }
 }

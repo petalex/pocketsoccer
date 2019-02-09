@@ -1,7 +1,6 @@
 package com.example.pocketsoccer.views.settings;
 
 import android.annotation.SuppressLint;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,12 +11,13 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.pocketsoccer.R;
-import com.example.pocketsoccer.views.SettingsPreferences;
+import com.example.pocketsoccer.utils.FontManager;
+import com.example.pocketsoccer.utils.SettingsManager;
 
-public class SpeedFragment extends Fragment implements ChangingFragment {
-    private SettingsPreferences preferences;
+import org.jetbrains.annotations.NotNull;
 
-    private ChangeFragmentListener listener;
+public class SpeedFragment extends Fragment {
+     private ChangeFragmentListener listener;
 
     private TextView value;
 
@@ -31,19 +31,16 @@ public class SpeedFragment extends Fragment implements ChangingFragment {
 
     @SuppressLint("NewApi")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_speed, container, false);
 
-        setChangeFragmentListener((SettingsActivity) getActivity());
-
-        Typeface titleFont = Typeface.createFromAsset(view.getContext().getAssets(), "fonts/Chunkfive.otf");
-        Typeface menuFont = Typeface.createFromAsset(view.getContext().getAssets(), "fonts/Sanson.otf");
+        this.listener = (SettingsActivity) getActivity();
 
         TextView speedTitle = view.findViewById(R.id.speed_title);
-        speedTitle.setTypeface(titleFont);
+        speedTitle.setTypeface(FontManager.getTitleFont());
 
         value = view.findViewById(R.id.speed_value);
-        value.setTypeface(menuFont);
+        value.setTypeface(FontManager.getMenuFont());
 
         slider = view.findViewById(R.id.speed_slider);
         slider.setMin(1);
@@ -74,7 +71,7 @@ public class SpeedFragment extends Fragment implements ChangingFragment {
         });
 
         TextView reset = view.findViewById(R.id.reset_speed);
-        reset.setTypeface(menuFont);
+        reset.setTypeface(FontManager.getMenuFont());
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,30 +79,25 @@ public class SpeedFragment extends Fragment implements ChangingFragment {
             }
         });
 
-        preferences = SettingsPreferences.getInstance(getContext());
-
         return view;
     }
 
     private void setSpeed(int s, boolean andSlider) {
         speed = s;
-        value.setText("" + speed);
+        String text = "" + speed;
+        value.setText(text);
         if (andSlider) {
             slider.setProgress(speed);
         }
     }
 
     private void loadSettings() {
-        defaultSpeed = preferences.getIntSetting("defaultSpeed", 0);
-        if (defaultSpeed == 0) { // Only first time
-            preferences.setIntSetting("defaultSpeed", 4);
-            defaultSpeed = preferences.getIntSetting("defaultSpeed", 0);
-        }
-        setSpeed(preferences.getIntSetting("speed", defaultSpeed), true);
+        defaultSpeed = SettingsManager.getDefaultSpeed();
+        setSpeed(SettingsManager.getSpeed(defaultSpeed), true);
     }
 
     private void saveSettings() {
-        preferences.setIntSetting("speed", speed);
+        SettingsManager.setSpeed(speed);
     }
 
     @Override
@@ -118,10 +110,5 @@ public class SpeedFragment extends Fragment implements ChangingFragment {
     public void onPause() {
         super.onPause();
         saveSettings();
-    }
-
-    @Override
-    public void setChangeFragmentListener(ChangeFragmentListener listener) {
-        this.listener = listener;
     }
 }

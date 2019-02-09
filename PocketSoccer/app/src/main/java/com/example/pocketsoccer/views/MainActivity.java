@@ -2,26 +2,26 @@ package com.example.pocketsoccer.views;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.pocketsoccer.R;
+import com.example.pocketsoccer.utils.FontManager;
+import com.example.pocketsoccer.utils.GameInfoManager;
+import com.example.pocketsoccer.utils.ImageManager;
+import com.example.pocketsoccer.utils.SettingsManager;
+import com.example.pocketsoccer.utils.SoundManager;
+import com.example.pocketsoccer.views.game.GameActivity;
 import com.example.pocketsoccer.views.settings.SettingsActivity;
 import com.example.pocketsoccer.views.statistics.StatisticsActivity;
 
-import java.io.IOException;
-
 public class MainActivity extends AppCompatActivity {
-    private boolean sound = true;
+    private TextView resumeGame;
 
     @SuppressLint("NewApi")
     @Override
@@ -30,26 +30,19 @@ public class MainActivity extends AppCompatActivity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
         setContentView(R.layout.activity_main);
 
-        try {
-            Drawable background = Drawable.createFromStream(getAssets().open("backgrounds/main.jpg"), null);
-            ConstraintLayout mainLayout = findViewById(R.id.main_layout);
-            mainLayout.setBackground(background);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        initAppUtils();
 
-        Typeface titleFont = Typeface.createFromAsset(getAssets(), "fonts/Chunkfive.otf");
-        Typeface menuFont = Typeface.createFromAsset(getAssets(), "fonts/Sanson.otf");
+        ConstraintLayout mainLayout = findViewById(R.id.main_layout);
+        mainLayout.setBackground(ImageManager.getBackground());
 
         TextView title = findViewById(R.id.title);
-        title.setTypeface(titleFont);
+        title.setTypeface(FontManager.getTitleFont());
 
         TextView newGame = findViewById(R.id.new_game);
-        newGame.setTypeface(menuFont);
+        newGame.setTypeface(FontManager.getMenuFont());
         newGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,21 +51,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        TextView resumeGame = findViewById(R.id.resume_game);
-        resumeGame.setTypeface(menuFont);
-        resumeGame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Shit", Toast.LENGTH_SHORT).show();
-            }
-        });
-        if (true) {
-            resumeGame.setEnabled(false);
-            resumeGame.setTextColor(getResources().getColor(R.color.gray));
-        }
+        resumeGame = findViewById(R.id.resume_game);
+        resumeGame.setTypeface(FontManager.getMenuFont());
 
         TextView statistics = findViewById(R.id.statistics);
-        statistics.setTypeface(menuFont);
+        statistics.setTypeface(FontManager.getMenuFont());
         statistics.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TextView settings = findViewById(R.id.settings);
-        settings.setTypeface(menuFont);
+        settings.setTypeface(FontManager.getMenuFont());
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,17 +74,51 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final ImageView soundIcon = findViewById(R.id.sound);
+        /*final ImageView soundIcon = findViewById(R.id.sound);
         soundIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (sound) {
+                    // Stop playing main track
+                    player.stop();
                     soundIcon.setImageDrawable(getDrawable(R.drawable.ic_volume_off_white_24dp));
                 } else {
+                    // Start playing main track
+                    player.start();
                     soundIcon.setImageDrawable(getDrawable(R.drawable.ic_volume_up_white_24dp));
                 }
                 sound = !sound;
             }
-        });
+        });*/
+    }
+
+    private void initAppUtils() {
+        FontManager.init(getAssets());
+        ImageManager.init(getAssets());
+        SoundManager.init(getAssets());
+        GameInfoManager.init(this);
+        SettingsManager.init(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (GameInfoManager.isSaved()) {
+            // Enable Resume button
+            resumeGame.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent gameIntent = new Intent(v.getContext(), GameActivity.class);
+                    gameIntent.putExtra("new", false);
+                    startActivity(gameIntent);
+                }
+            });
+            resumeGame.setEnabled(true);
+            resumeGame.setTextColor(getResources().getColor(android.R.color.white));
+        } else {
+            // Disable Resume button
+            resumeGame.setEnabled(false);
+            resumeGame.setTextColor(getResources().getColor(android.R.color.darker_gray));
+        }
     }
 }

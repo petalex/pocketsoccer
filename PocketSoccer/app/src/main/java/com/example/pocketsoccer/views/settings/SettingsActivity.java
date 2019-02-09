@@ -1,7 +1,6 @@
 package com.example.pocketsoccer.views.settings;
 
 import android.annotation.SuppressLint;
-import android.graphics.drawable.Drawable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,8 +11,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.example.pocketsoccer.R;
-
-import java.io.IOException;
+import com.example.pocketsoccer.utils.ImageManager;
 
 public class SettingsActivity extends AppCompatActivity implements ChangeFragmentListener {
     private static FragmentManager manager;
@@ -27,17 +25,11 @@ public class SettingsActivity extends AppCompatActivity implements ChangeFragmen
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
         setContentView(R.layout.activity_settings);
 
-        try {
-            Drawable background = Drawable.createFromStream(getAssets().open("backgrounds/main.jpg"), null);
-            ConstraintLayout settingsLayout = findViewById(R.id.settings_layout);
-            settingsLayout.setBackground(background);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ConstraintLayout settingsLayout = findViewById(R.id.settings_layout);
+        settingsLayout.setBackground(ImageManager.getBackground());
 
         manager = getSupportFragmentManager();
         changeToSettingsFragment();

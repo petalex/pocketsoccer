@@ -85,8 +85,8 @@
         android:id="@+id/speed_slider"
         android:layout_width="484dp"
         android:layout_height="@dimen/slider_height"
-        android:progressTint="@color/white"
-        android:thumbTint="@color/white"
+        android:progressTint="@android:color/white"
+        android:thumbTint="@android:color/white"
         app:layout_constraintRight_toRightOf="@id/slider_rightGuideline"
         app:layout_constraintTop_toTopOf="@id/slider_topGuideline"
         tools:targetApi="lollipop" />

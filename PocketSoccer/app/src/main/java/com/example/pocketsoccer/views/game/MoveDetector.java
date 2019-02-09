@@ -1,15 +1,16 @@
 package com.example.pocketsoccer.views.game;
 
-import android.os.AsyncTask;
-
 import com.example.pocketsoccer.views.game.figures.Figure;
-import com.example.pocketsoccer.views.game.figures.Player;
+import com.example.pocketsoccer.views.game.timers.MoveTimer;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MoveDetector {
+    /**
+     * Game refresh rate constant (= 0.1kHz)
+     */
     public static final int REFRESH_RATE = 100;
 
     private GameImageView game;
@@ -20,29 +21,25 @@ public class MoveDetector {
 
     private float downX, downY;
 
-    private float speed;
-
     public MoveDetector(GameImageView game) {
         this.game = game;
     }
 
-    public float getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(float speed) {
-        this.speed = speed;
-    }
-
     public void down(float x, float y) {
         touchedPlayer = findTouchedPlayer(x, y);
+        if (touchedPlayer != null) {
+            game.getData().setSelectedPlayer(touchedPlayer);
+            refreshGame();
+        }
     }
 
     public void up(float x, float y) {
         if (touchedPlayer != null) {
-            touchedPlayer.initMove(x - downX, y - downY, speed);
+            touchedPlayer.initMove(x - downX, y - downY);
             startMovement();
+            game.getData().setSelectedPlayer(null);
             game.swapTeamOnMove();
+            MoveTimer.setTimer();
         }
     }
 
@@ -52,16 +49,18 @@ public class MoveDetector {
 
     private Figure findTouchedPlayer(float x, float y) {
         List<Figure> team = game.getData().getTeamOnMove();
-        for (int i = 0; i < GameData.N; ++i) {
-            Figure player = team.get(i);
-            if (isTouched(player, x, y)) {
-                downX = x;
-                downY = y;
-                return player;
+        if (team != null) {
+            for (int i = 0; i < GameData.N; ++i) {
+                Figure player = team.get(i);
+                if (isTouched(player, x, y)) {
+                    downX = x;
+                    downY = y;
+                    return player;
+                }
             }
         }
-
         return null;
+
     }
 
     private boolean isTouched(Figure player, float x, float y) {
@@ -71,7 +70,6 @@ public class MoveDetector {
     private float getDistance(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
-
 
     public void startMovement() {
         if (moveTimer == null) {
@@ -90,6 +88,5 @@ public class MoveDetector {
             moveTimer.cancel();
             moveTimer = null;
         }
-
     }
 }

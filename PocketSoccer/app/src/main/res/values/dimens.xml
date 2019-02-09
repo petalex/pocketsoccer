@@ -5,6 +5,7 @@
     <dimen name="optionsText">48sp</dimen>
     <dimen name="menuText">42sp</dimen>
     <dimen name="smallText">32sp</dimen>
+    <dimen name="inputText">24sp</dimen>
     <dimen name="layout_padding">30dp</dimen>
     <dimen name="pair_padding">20dp</dimen>
     <dimen name="icon_size">36dp</dimen>

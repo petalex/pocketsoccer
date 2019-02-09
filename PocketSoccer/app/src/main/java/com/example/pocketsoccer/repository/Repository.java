@@ -16,18 +16,25 @@ public class Repository {
 
     private GameDao gameDao;
 
+    private LiveData<List<Pair>> pairs;
+
     public Repository(Application application) {
         AppDatabase database = AppDatabase.getInstance(application);
         pairDao = database.pairDao();
         gameDao = database.gameDao();
+        pairs =  pairDao.getAllPairs();
     }
 
     public LiveData<List<Pair>> getAllPairs() {
-        return pairDao.getAllPairs();
+        return pairs;
     }
 
     public LiveData<Pair> getPairById(int id) {
         return pairDao.getPairById(id);
+    }
+
+    public LiveData<Pair> getPairByPlayers(String player1, String player2) {
+        return pairDao.getPairByPlayers(player1, player2);
     }
 
     public void insertPair(final Pair pair) {

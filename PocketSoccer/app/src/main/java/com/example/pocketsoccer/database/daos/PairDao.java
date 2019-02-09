@@ -18,6 +18,9 @@ public interface PairDao {
     @Query("SELECT * FROM pair WHERE id=:id")
     LiveData<Pair> getPairById(int id);
 
+    @Query("SELECT * FROM pair WHERE (player1=:player1 AND player2=:player2) OR (player1=:player2 AND player2=:player1)")
+    LiveData<Pair> getPairByPlayers(String player1, String player2);
+
     @Insert
     void insertPair(Pair pair);
 

@@ -41,8 +41,8 @@ public abstract class AppDatabase extends RoomDatabase {
         @Override
         protected Void doInBackground(Void... voids) {
             Pair pair = new Pair();
-            pair.player1 = "petalex";
-            pair.player2 = "djekatore";
+            pair.player1 = "PETALEX";
+            pair.player2 = "DJEKATORE";
             pairDao.insertPair(pair);
             Game game = new Game();
             game.pairId = 1;

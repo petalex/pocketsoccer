@@ -1,7 +1,6 @@
 package com.example.pocketsoccer.views.settings;
 
 import android.annotation.SuppressLint;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,15 +14,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.pocketsoccer.R;
-import com.example.pocketsoccer.views.SettingsPreferences;
+import com.example.pocketsoccer.utils.FontManager;
+import com.example.pocketsoccer.utils.ImageManager;
+import com.example.pocketsoccer.utils.SettingsManager;
 
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class FieldFragment extends Fragment implements ChangingFragment {
-    private SettingsPreferences preferences;
-
+public class FieldFragment extends Fragment {
     private ChangeFragmentListener listener;
 
     private ViewPager fieldPager;
@@ -38,16 +38,13 @@ public class FieldFragment extends Fragment implements ChangingFragment {
 
     @SuppressLint("NewApi")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_field, container, false);
 
-        setChangeFragmentListener((SettingsActivity) getActivity());
-
-        Typeface titleFont = Typeface.createFromAsset(view.getContext().getAssets(), "fonts/Chunkfive.otf");
-        Typeface menuFont = Typeface.createFromAsset(view.getContext().getAssets(), "fonts/Sanson.otf");
+        this.listener = (SettingsActivity) getActivity();
 
         TextView fieldTitle = view.findViewById(R.id.field_title);
-        fieldTitle.setTypeface(titleFont);
+        fieldTitle.setTypeface(FontManager.getTitleFont());
 
         fieldPager = view.findViewById(R.id.field_pager);
         adapter = new ViewPagerAdapter();
@@ -113,15 +110,13 @@ public class FieldFragment extends Fragment implements ChangingFragment {
         });
 
         TextView reset = view.findViewById(R.id.reset_field);
-        reset.setTypeface(menuFont);
+        reset.setTypeface(FontManager.getMenuFont());
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setField(defaultField);
             }
         });
-
-        preferences = SettingsPreferences.getInstance(getContext());
 
         return view;
     }
@@ -132,16 +127,12 @@ public class FieldFragment extends Fragment implements ChangingFragment {
     }
 
     private void loadSettings() {
-        defaultField = preferences.getIntSetting("defaultField", 0);
-        if (defaultField == 0) { // Only first time
-            preferences.setIntSetting("defaultField", 1);
-            defaultField = preferences.getIntSetting("defaultField", 0);
-        }
-        setField(preferences.getIntSetting("field", defaultField));
+        defaultField = SettingsManager.getDefaultField();
+        setField(SettingsManager.getField(defaultField));
     }
 
     private void saveSettings() {
-        preferences.setIntSetting("field", field);
+        SettingsManager.setField(field);
     }
 
     @Override
@@ -156,11 +147,6 @@ public class FieldFragment extends Fragment implements ChangingFragment {
         saveSettings();
     }
 
-    @Override
-    public void setChangeFragmentListener(ChangeFragmentListener listener) {
-        this.listener = listener;
-    }
-
     private class ViewPagerAdapter extends PagerAdapter {
         private List<Drawable> fields;
 
@@ -170,11 +156,7 @@ public class FieldFragment extends Fragment implements ChangingFragment {
             fields = new ArrayList<>();
             fields.add(null);
             for (int i = 1; i <= FIELD_COUNT; ++i) {
-                try {
-                    fields.add(Drawable.createFromStream(getActivity().getAssets().open("fields/field" + i + ".png"), null));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                fields.add(ImageManager.getField(i));
             }
             fields.add(null);
         }

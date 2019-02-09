@@ -4,8 +4,7 @@ import android.annotation.SuppressLint;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -22,25 +21,21 @@ import android.widget.Toast;
 import com.example.pocketsoccer.R;
 import com.example.pocketsoccer.database.entities.Game;
 import com.example.pocketsoccer.database.entities.Pair;
+import com.example.pocketsoccer.utils.FontManager;
+import com.example.pocketsoccer.utils.ImageManager;
 import com.example.pocketsoccer.viewmodels.GameViewModel;
 import com.example.pocketsoccer.viewmodels.PairViewModel;
 import com.example.pocketsoccer.viewmodels.ViewModelFactory;
+import com.example.pocketsoccer.views.MainActivity;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ScoresActivity extends AppCompatActivity {
     private TextView scoresTitle;
 
-    private RecyclerView scoresList;
-
     private ScoresAdapter scoresAdapter;
 
-    private PairViewModel pairViewModel;
-
     private GameViewModel gameViewModel;
-
-    private int pairId;
 
     @SuppressLint("NewApi")
     @Override
@@ -49,29 +44,20 @@ public class ScoresActivity extends AppCompatActivity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
         setContentView(R.layout.activity_scores);
 
-        try {
-            Drawable background = Drawable.createFromStream(getAssets().open("backgrounds/main.jpg"), null);
-            ConstraintLayout scoresLayout = findViewById(R.id.scores_layout);
-            scoresLayout.setBackground(background);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Typeface titleFont = Typeface.createFromAsset(getAssets(), "fonts/Chunkfive.otf");
-        Typeface menuFont = Typeface.createFromAsset(getAssets(), "fonts/Sanson.otf");
+        ConstraintLayout scoresLayout = findViewById(R.id.scores_layout);
+        scoresLayout.setBackground(ImageManager.getBackground());
 
         scoresTitle = findViewById(R.id.scores_title);
-        scoresTitle.setTypeface(titleFont);
+        scoresTitle.setTypeface(FontManager.getTitleFont());
 
         TextView time_title = findViewById(R.id.time_title);
-        time_title.setTypeface(menuFont);
+        time_title.setTypeface(FontManager.getMenuFont());
 
         TextView scoreTitle = findViewById(R.id.score_title);
-        scoreTitle.setTypeface(menuFont);
+        scoreTitle.setTypeface(FontManager.getMenuFont());
 
         ImageView back = findViewById(R.id.scores_back);
         back.setOnClickListener(new View.OnClickListener() {
@@ -82,7 +68,7 @@ public class ScoresActivity extends AppCompatActivity {
         });
 
         TextView clear = findViewById(R.id.clear_scores);
-        clear.setTypeface(menuFont);
+        clear.setTypeface(FontManager.getMenuFont());
         clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,18 +77,23 @@ public class ScoresActivity extends AppCompatActivity {
             }
         });
 
-        scoresList = findViewById(R.id.scores_list);
+        RecyclerView scoresList = findViewById(R.id.scores_list);
         scoresList.setLayoutManager(new LinearLayoutManager(this));
-        scoresAdapter = new ScoresAdapter(this);
+        scoresAdapter = new ScoresAdapter();
         scoresList.setAdapter(scoresAdapter);
 
         ViewModelFactory<AndroidViewModel> factory = new ViewModelFactory<>(ViewModelProviders.of(this));
-        pairViewModel = factory.create(PairViewModel.class);
-        pairId = getIntent().getIntExtra("id", 0);
+        PairViewModel pairViewModel = factory.create(PairViewModel.class);
+        int pairId = getIntent().getIntExtra("id", 0);
         pairViewModel.getPairById(pairId).observe(this, new Observer<Pair>() {
             @Override
             public void onChanged(@Nullable Pair pair) {
-                scoresTitle.setText(pair.player1 + " - " + pair.player2);
+                String title = "";
+                if (pair != null) {
+                    title = pair.player1 + " - " + pair.player2;
+                }
+                scoresTitle.setText(title);
+
             }
         });
         gameViewModel = factory.create(GameViewModel.class);
@@ -112,6 +103,5 @@ public class ScoresActivity extends AppCompatActivity {
                 scoresAdapter.setGames(games);
             }
         });
-
     }
 }

@@ -1,7 +1,6 @@
 package com.example.pocketsoccer.views.statistics;
 
 import android.arch.lifecycle.Observer;
-import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
@@ -13,20 +12,17 @@ import android.widget.TextView;
 
 import com.example.pocketsoccer.R;
 import com.example.pocketsoccer.database.entities.Pair;
+import com.example.pocketsoccer.utils.FontManager;
 
 import java.util.List;
 
-public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.ViewHolder> implements ShowScoresAdapter {
+public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.ViewHolder> {
     private ShowScoresListener listener;
 
     private List<Pair> pairs;
 
-    private static Typeface viewHolderFont;
-
     public StatisticsAdapter(StatisticsActivity listener) {
-        setShowScoresListener(listener);
-        this.viewHolderFont = Typeface.createFromAsset(listener.getAssets(), "fonts/Sanson.otf");
-        ;
+        this.listener = listener;
     }
 
     public void setPairs(List<Pair> pairs) {
@@ -36,13 +32,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
     public List<Pair> getPairs() {
         return pairs;
-    }
-
-    public Pair getPairAtPosition(int position) {
-        if (pairs != null) {
-            return pairs.get(position);
-        }
-        return null;
     }
 
     @NonNull
@@ -68,11 +57,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         return 0;
     }
 
-    @Override
-    public void setShowScoresListener(ShowScoresListener listener) {
-        this.listener = listener;
-    }
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private CardView view;
 
@@ -84,15 +68,15 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             super(itemView);
             view = (CardView) itemView;
             player1 = itemView.findViewById(R.id.player1);
-            player1.setTypeface(viewHolderFont);
+            player1.setTypeface(FontManager.getMenuFont());
             wins1 = itemView.findViewById(R.id.wins1);
-            wins1.setTypeface(viewHolderFont);
+            wins1.setTypeface(FontManager.getMenuFont());
             semicolon = itemView.findViewById(R.id.semicolon);
-            semicolon.setTypeface(viewHolderFont);
+            semicolon.setTypeface(FontManager.getMenuFont());
             wins2 = itemView.findViewById(R.id.wins2);
-            wins2.setTypeface(viewHolderFont);
+            wins2.setTypeface(FontManager.getMenuFont());
             player2 = itemView.findViewById(R.id.player2);
-            player2.setTypeface(viewHolderFont);
+            player2.setTypeface(FontManager.getMenuFont());
         }
 
         public void setShowScoresListener(ShowScoresListener listener) {

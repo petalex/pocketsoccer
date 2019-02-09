@@ -12,11 +12,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.pocketsoccer.R;
-import com.example.pocketsoccer.views.SettingsPreferences;
+import com.example.pocketsoccer.utils.FontManager;
+import com.example.pocketsoccer.utils.SettingsManager;
 
-public class MatchFragment extends Fragment implements ChangingFragment {
-    private SettingsPreferences preferences;
-
+public class MatchFragment extends Fragment {
     private ChangeFragmentListener listener;
 
     private TextView time1, time3, time5, goals1, goals3, goals5, goals10;
@@ -32,25 +31,22 @@ public class MatchFragment extends Fragment implements ChangingFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_match, container, false);
 
-        setChangeFragmentListener((SettingsActivity) getActivity());
-
-        Typeface titleFont = Typeface.createFromAsset(view.getContext().getAssets(), "fonts/Chunkfive.otf");
-        Typeface menuFont = Typeface.createFromAsset(view.getContext().getAssets(), "fonts/Sanson.otf");
+        this.listener = (SettingsActivity) getActivity();
 
         TextView matchTitle = view.findViewById(R.id.match_title);
-        matchTitle.setTypeface(titleFont);
+        matchTitle.setTypeface(FontManager.getTitleFont());
 
         TextView timeTitle = view.findViewById(R.id.time_title);
-        timeTitle.setTypeface(menuFont);
+        timeTitle.setTypeface(FontManager.getMenuFont());
 
         TextView orTitle = view.findViewById(R.id.or_title);
-        orTitle.setTypeface(menuFont);
+        orTitle.setTypeface(FontManager.getMenuFont());
 
         TextView goalsTitle = view.findViewById(R.id.goals_title);
-        goalsTitle.setTypeface(menuFont);
+        goalsTitle.setTypeface(FontManager.getMenuFont());
 
         time1 = view.findViewById(R.id.time_1);
-        time1.setTypeface(menuFont);
+        time1.setTypeface(FontManager.getMenuFont());
         time1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,7 +55,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         });
 
         time3 = view.findViewById(R.id.time_3);
-        time3.setTypeface(menuFont);
+        time3.setTypeface(FontManager.getMenuFont());
         time3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,7 +64,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         });
 
         time5 = view.findViewById(R.id.time_5);
-        time5.setTypeface(menuFont);
+        time5.setTypeface(FontManager.getMenuFont());
         time5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +73,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         });
 
         goals1 = view.findViewById(R.id.goals_1);
-        goals1.setTypeface(menuFont);
+        goals1.setTypeface(FontManager.getMenuFont());
         goals1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,7 +82,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         });
 
         goals3 = view.findViewById(R.id.goals_3);
-        goals3.setTypeface(menuFont);
+        goals3.setTypeface(FontManager.getMenuFont());
         goals3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,7 +91,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         });
 
         goals5 = view.findViewById(R.id.goals_5);
-        goals5.setTypeface(menuFont);
+        goals5.setTypeface(FontManager.getMenuFont());
         goals5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,7 +100,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         });
 
         goals10 = view.findViewById(R.id.goals_10);
-        goals10.setTypeface(menuFont);
+        goals10.setTypeface(FontManager.getMenuFont());
         goals10.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,15 +117,13 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         });
 
         TextView reset = view.findViewById(R.id.reset_match);
-        reset.setTypeface(menuFont);
+        reset.setTypeface(FontManager.getMenuFont());
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectOptionView(defaultOption);
             }
         });
-
-        preferences = SettingsPreferences.getInstance(getContext());
 
         return view;
     }
@@ -149,20 +143,16 @@ public class MatchFragment extends Fragment implements ChangingFragment {
     }
 
     private void loadSettings() {
-        int defaultMatch = preferences.getIntSetting("defaultMatch", 0);
-        if (defaultMatch == 0) { // Only first time
-            preferences.setIntSetting("defaultMatch", 3);
-            defaultMatch = preferences.getIntSetting("defaultMatch", 0);
-        }
-        defaultOption = optionToView("defaultMatch", defaultMatch);
-
-        String matchText = preferences.getStringSetting("match", "defaultMatch");
-        int matchValue = preferences.getIntSetting(matchText, 0);
-        selectOptionView(optionToView(matchText, matchValue));
+        String defaultMatchType = SettingsManager.getDefaultMatchType();
+        int defaultMatch = SettingsManager.getDefaultMatch();
+        defaultOption = matchToView(defaultMatchType, defaultMatch);
+        String matchType = SettingsManager.getMatchType(defaultMatchType);
+        int match = SettingsManager.getMatch(defaultMatch);
+        selectOptionView(matchToView(matchType, match));
     }
 
-    private TextView optionToView(String option, int value) {
-        switch (option) {
+    private TextView matchToView(String type, int value) {
+        switch (type) {
             case "time": {
                 switch (value) {
                     case 1:
@@ -173,8 +163,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
                         return time5;
                 }
             }
-            case "goals":
-            case "defaultMatch": {
+            case "goals": {
                 switch (value) {
                     case 1:
                         return goals1;
@@ -190,7 +179,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         return null;
     }
 
-    private String optionToText() {
+    private String viewToMatchType() {
         switch (selectedOption.getId()) {
             case R.id.time_1:
             case R.id.time_3:
@@ -205,7 +194,7 @@ public class MatchFragment extends Fragment implements ChangingFragment {
         return null;
     }
 
-    private int optionToValue() {
+    private int viewToMatch() {
         switch (selectedOption.getId()) {
             case R.id.time_1:
             case R.id.goals_1:
@@ -223,8 +212,8 @@ public class MatchFragment extends Fragment implements ChangingFragment {
     }
 
     private void saveSettings() {
-        preferences.setStringSetting("match", optionToText());
-        preferences.setIntSetting(optionToText(), optionToValue());
+        SettingsManager.setMatchType(viewToMatchType());
+        SettingsManager.setMatch(viewToMatch());
     }
 
     @Override
@@ -237,10 +226,5 @@ public class MatchFragment extends Fragment implements ChangingFragment {
     public void onPause() {
         super.onPause();
         saveSettings();
-    }
-
-    @Override
-    public void setChangeFragmentListener(ChangeFragmentListener listener) {
-        this.listener = listener;
     }
 }

@@ -2,8 +2,6 @@ package com.example.pocketsoccer.views;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -21,9 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.pocketsoccer.R;
+import com.example.pocketsoccer.utils.FontManager;
+import com.example.pocketsoccer.utils.ImageManager;
 import com.example.pocketsoccer.views.game.GameActivity;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,26 +50,17 @@ public class PlayersActivity extends AppCompatActivity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
         setContentView(R.layout.activity_players);
 
-        try {
-            Drawable background = Drawable.createFromStream(getAssets().open("backgrounds/main.jpg"), null);
-            ConstraintLayout playersLayout = findViewById(R.id.players_layout);
-            playersLayout.setBackground(background);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Typeface titleFont = Typeface.createFromAsset(getAssets(), "fonts/Chunkfive.otf");
-        Typeface menuFont = Typeface.createFromAsset(getAssets(), "fonts/Sanson.otf");
+        ConstraintLayout playersLayout = findViewById(R.id.players_layout);
+        playersLayout.setBackground(ImageManager.getBackground());
 
         TextView player1Title = findViewById(R.id.player1_title);
-        player1Title.setTypeface(menuFont);
+        player1Title.setTypeface(FontManager.getMenuFont());
 
         TextView player2Title = findViewById(R.id.player2_title);
-        player2Title.setTypeface(menuFont);
+        player2Title.setTypeface(FontManager.getMenuFont());
 
         ImageView back = findViewById(R.id.players_back);
         back.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +71,7 @@ public class PlayersActivity extends AppCompatActivity {
         });
 
         final EditText player1 = findViewById(R.id.player1);
+        player1.setTypeface(FontManager.getMenuFont());
 
         final ImageView chekbox1 = findViewById(R.id.player1_checkbox);
         chekbox1.setOnClickListener(new View.OnClickListener() {
@@ -152,6 +143,7 @@ public class PlayersActivity extends AppCompatActivity {
         });
 
         final EditText player2 = findViewById(R.id.player2);
+        player2.setTypeface(FontManager.getMenuFont());
 
         final ImageView chekbox2 = findViewById(R.id.player2_checkbox);
         chekbox2.setOnClickListener(new View.OnClickListener() {
@@ -222,20 +214,20 @@ public class PlayersActivity extends AppCompatActivity {
         });
 
         TextView play = findViewById(R.id.play);
-        play.setTypeface(titleFont);
+        play.setTypeface(FontManager.getTitleFont());
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String player1Name = player1.getText().toString();
                 String player2Name = player2.getText().toString();
-                /*if (player1Name.equals("")) {
+                if (player1Name.equals("")) {
                     Toast.makeText(v.getContext(), "Please enter Player 1's name!", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (player2Name.equals("")) {
                     Toast.makeText(v.getContext(), "Please enter Player 2's name!", Toast.LENGTH_SHORT).show();
                     return;
-                }*/
+                }
                 Intent gameIntent = new Intent(v.getContext(), GameActivity.class);
                 gameIntent.putExtra("new", true);
                 gameIntent.putExtra("player1", player1Name);
@@ -245,11 +237,12 @@ public class PlayersActivity extends AppCompatActivity {
                 gameIntent.putExtra("team1", team1);
                 gameIntent.putExtra("team2", team2);
                 startActivity(gameIntent);
+                finish();
             }
         });
 
-        setTeam1(1);
-        setTeam2(2);
+        setTeam1(1); // Red Star
+        setTeam2(2); // Partizan
     }
 
     private void setTeam1(int team) {
@@ -265,17 +258,13 @@ public class PlayersActivity extends AppCompatActivity {
     private class ViewPagerAdapter extends PagerAdapter {
         private List<Drawable> teams;
 
-        private static final int TEAM_COUNT = 35;
+        private static final int TEAM_COUNT = 70;
 
         public ViewPagerAdapter() {
             teams = new ArrayList<>();
             teams.add(null);
             for (int i = 1; i <= TEAM_COUNT; ++i) {
-                try {
-                    teams.add(Drawable.createFromStream(getAssets().open("teams/t" + i + ".png"), null));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                teams.add(ImageManager.getTeam(i));
             }
             teams.add(null);
         }
@@ -304,5 +293,11 @@ public class PlayersActivity extends AppCompatActivity {
         public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             ((ViewPager) container).removeView((View) object);
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        finish();
     }
 }

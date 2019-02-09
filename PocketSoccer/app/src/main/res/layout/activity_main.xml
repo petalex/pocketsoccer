@@ -8,6 +8,7 @@
     android:padding="@dimen/layout_padding"
     tools:context=".views.MainActivity">
 
+    <!--
     <ImageView
         android:id="@+id/sound"
         android:layout_width="@dimen/icon_size"
@@ -16,6 +17,7 @@
         android:src="@drawable/ic_volume_up_white_24dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+     -->
 
     <android.support.constraint.Guideline
         android:id="@+id/title_guideline"

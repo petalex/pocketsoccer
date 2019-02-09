@@ -2,6 +2,7 @@ package com.example.pocketsoccer.views.game.figures;
 
 import android.graphics.PointF;
 
+import com.example.pocketsoccer.utils.GameInfoManager;
 import com.example.pocketsoccer.views.game.MoveDetector;
 
 public class Player implements Figure {
@@ -17,7 +18,7 @@ public class Player implements Figure {
     public Player(PointF center) {
         this.center = center;
         this.r = R;
-        this.m = R;
+        this.m = R * R;
         this.dx = 0;
         this.dy = 0;
     }
@@ -28,8 +29,18 @@ public class Player implements Figure {
     }
 
     @Override
+    public void setX(float x) {
+        this.center.x = x;
+    }
+
+    @Override
     public float getY() {
         return center.y;
+    }
+
+    @Override
+    public void setY(float y) {
+        this.center.y = y;
     }
 
     @Override
@@ -63,8 +74,9 @@ public class Player implements Figure {
     }
 
     @Override
-    public void initMove(float dx, float dy, float speed) {
-        float scale = S * MoveDetector.REFRESH_RATE;
+    public void initMove(float dx, float dy) {
+        float speed = (float) Math.log(S * GameInfoManager.getSpeed());
+        float scale = V * MoveDetector.REFRESH_RATE;
         this.dx = speed * dx / scale;
         this.dy = speed * dy / scale;
     }

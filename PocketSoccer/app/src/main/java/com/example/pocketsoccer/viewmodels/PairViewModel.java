@@ -25,6 +25,11 @@ public class PairViewModel extends AndroidViewModel {
     public LiveData<Pair> getPairById(int id) {
         return repository.getPairById(id);
     }
+
+    public LiveData<Pair> getPairByPlayers(String player1, String player2) {
+        return repository.getPairByPlayers(player1, player2);
+    }
+
     public void insertPair(Pair pair) {
         repository.insertPair(pair);
     }
