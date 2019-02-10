@@ -200,6 +200,7 @@ public class GameImageView extends ImageView {
         if (timeFinished) {
             // Execute game over on main thread
             gameOver();
+            timeFinished = false;
         }
         if (enabled) {
             if (move()) {
