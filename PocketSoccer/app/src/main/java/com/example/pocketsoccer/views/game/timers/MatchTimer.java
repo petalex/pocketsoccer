@@ -33,7 +33,7 @@ public class MatchTimer {
                 if (!paused) {
                     GameInfoManager.addToTime();
                     if (GameInfoManager.getMatchType().equals("time") && GameInfoManager.getTime() == GameInfoManager.getMatch() * 60) {
-                        listener.gameOver();
+                        listener.timeFinished();
                         timer.cancel();
                     }
                 }

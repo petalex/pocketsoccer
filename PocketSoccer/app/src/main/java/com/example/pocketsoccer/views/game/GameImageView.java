@@ -36,7 +36,7 @@ public class GameImageView extends ImageView {
 
     private Drawable team1, team2, ball, goals, selectedPlayer;
 
-    private boolean init = true, enabled = false, reset = false, computer = false;
+    private boolean init = true, enabled = false, reset = false, computer = false, timeFinished = false;
 
     public GameImageView(Context context) {
         super(context);
@@ -124,7 +124,12 @@ public class GameImageView extends ImageView {
         }
     }
 
-    public void gameOver() {
+    public void timeFinished() {
+        timeFinished = true;
+        invalidate();
+    }
+
+    private void gameOver() {
         Runnable finish = new Runnable() {
             @Override
             public void run() {
@@ -191,6 +196,10 @@ public class GameImageView extends ImageView {
             // Execute computer's move on main thread
             computerMove();
             computer = false;
+        }
+        if (timeFinished) {
+            // Execute game over on main thread
+            gameOver();
         }
         if (enabled) {
             if (move()) {
